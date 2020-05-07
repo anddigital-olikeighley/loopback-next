@@ -12,13 +12,18 @@ import {
   ContextObserver,
   CoreBindings,
   createBindingFromClass,
+  extensionFor,
   filterByKey,
   filterByTag,
   inject,
   Server,
   Subscription,
 } from '@loopback/core';
-import {BaseMiddlewareRegistry, ExpressRequestHandler} from '@loopback/express';
+import {
+  BaseMiddlewareRegistry,
+  DEFAULT_MIDDLEWARE_CHAIN,
+  ExpressRequestHandler,
+} from '@loopback/express';
 import {HttpServer, HttpServerOptions} from '@loopback/http-server';
 import {
   getControllerSpec,
@@ -250,7 +255,9 @@ export class RestServer extends BaseMiddlewareRegistry
       injectConfiguration: false,
       key: 'middleware.cors',
       group: 'cors',
-    });
+    }).apply(
+      extensionFor(DEFAULT_MIDDLEWARE_CHAIN, RestTags.REST_MIDDLEWARE_CHAIN),
+    );
 
     // Set up endpoints for OpenAPI spec/ui
     this._setupOpenApiSpecEndpoints();
@@ -324,7 +331,10 @@ export class RestServer extends BaseMiddlewareRegistry
     );
     this.expressMiddleware('middleware.apiSpec.defaults', router, {
       group: 'apiSpec',
-    });
+      upstreamGroups: 'cors',
+    }).apply(
+      extensionFor(DEFAULT_MIDDLEWARE_CHAIN, RestTags.REST_MIDDLEWARE_CHAIN),
+    );
   }
 
   /**
