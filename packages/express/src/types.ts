@@ -227,6 +227,24 @@ export interface MiddlewareBindingOptions
    * Name of the middleware extension point. Default to `DEFAULT_MIDDLEWARE_CHAIN`.
    */
   chain?: string;
+
+  /**
+   * An array of group names for upstream middleware in the cascading order.
+   *
+   * For example, the  `invokeMethod` depends on `parseParams` for request
+   * processing. The `upstreamGroups` for `invokeMethod` should be
+   * `['parseParams']`. The order of groups in the array does not matter.
+   */
+  upstreamGroups?: string | string[];
+
+  /**
+   * An array of group names for downstream middleware in the cascading order.
+   *
+   * For example, the  `sendResponse` depends on `invokeMethod` for response
+   * processing. The `downstreamGroups` for `sendResponse` should be
+   * `['invokeMethod']`. The order of groups in the array does not matter.
+   */
+  downstreamGroups?: string | string[];
 }
 
 /**
