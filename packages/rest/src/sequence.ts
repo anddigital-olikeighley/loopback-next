@@ -144,17 +144,17 @@ export class MiddlewareSequence implements SequenceHandler {
       // rest
       'findRoute',
 
-      // auth
+      // authentication
       'authentication',
 
+      // rest
       'parseParams',
       'invokeMethod',
     ],
   };
 
   /**
-   * Constructor: Injects findRoute, invokeMethod & logError
-   * methods as promises.
+   * Constructor: Injects `InvokeMiddleware` and `InvokeMiddlewareOptions`
    *
    * @param invokeMiddleware - invoker for registered middleware in a chain.
    * To be injected via SequenceActions.INVOKE_MIDDLEWARE.
@@ -170,13 +170,23 @@ export class MiddlewareSequence implements SequenceHandler {
    * Runs the default sequence. Given a handler context (request and response),
    * running the sequence will produce a response or an error.
    *
-   * Default sequence executes these steps
-   *  - Finds the appropriate controller method, swagger spec
-   *    and args for invocation
-   *  - Parses HTTP request to get API argument list
-   *  - Invokes the API which is defined in the Application Controller
-   *  - Writes the result from API into the HTTP response
-   *  - Error is caught and logged using 'logError' if any of the above steps
+   * Default sequence executes these groups of middleware:
+   *
+   *  - `cors`: Enforces `CORS`
+   *  - `openApiSpec`: Serves OpenAPI specs
+   *  - `findRoute`: Finds the appropriate controller method, swagger spec and
+   *    args for invocation
+   *  - `parseParams`: Parses HTTP request to get API argument list
+   *  - `invokeMethod`: Invokes the API which is defined in the Application
+   *    controller method
+   *
+   * In front of the groups above, we have a special middleware called
+   * `SendResponse`, which first invokes downstream middleware to get a result
+   * and handles the result or error respectively.
+   *
+   *  - Writes the result from API into the HTTP response (if the HTTP response
+   *    has not been produced yet by the middleware chain.
+   *  - Catches error logs it using 'logError' if any of the above steps
    *    in the sequence fails with an error.
    *
    * @param context - The request context: HTTP request and response objects,
